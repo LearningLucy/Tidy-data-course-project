@@ -38,11 +38,14 @@ mean_and_std <- (grepl("activityId" , colNames) |
 setForMeanAndStd <- setAllInOne[ , mean_and_std == TRUE]
 
 ##Using descriptive activity names to name the activities in the data set
-setWithActivityNames <- merge(setForMeanAndStd, activityLabels,
+setWithActivityNames <- merge(activityLabels, setForMeanAndStd, 
                               by='activityId',
-                              all.x=TRUE)
+                              all.y=TRUE)
 
 ##Creating a second, independent tidy data set with the average of each variable for each activity and each subject
-secTidySet <- aggregate(. ~subjectId + activityId, setWithActivityNames, mean)
+library(dplyr)
+secTidySet <- setWithActivityNames %>% 
+  group_by(subjectId, activityType) %>%
+  summarise_all(funs(mean))
 secTidySet <- secTidySet[order(secTidySet$subjectId, secTidySet$activityId),]
 write.table(secTidySet, "tidy.txt", row.name=FALSE)
